@@ -5,6 +5,10 @@
 /[Bb]uilds/
 /Assets/AssetStoreTools*
 
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
 # Visual Studio 2015 cache directory
 /.vs/
 

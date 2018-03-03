@@ -635,7 +635,7 @@ PlayerSettings:
   facebookSdkVersion: 7.9.4
   apiCompatibilityLevel: 2
   cloudProjectId: 72ff5e95-c111-4b00-90e9-b0fd84dbfb88
-  projectName: Pac-Man Retro
+  projectName: PacManRetro
   organizationId: fredbralvalex
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
