@@ -1,12 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Breakout Retro", "Breakout Retro.csproj", "{810CECC8-EBC5-B743-BB6F-9AEB5570D96B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{810CECC8-EBC5-B743-BB6F-9AEB5570D96B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{810CECC8-EBC5-B743-BB6F-9AEB5570D96B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{810CECC8-EBC5-B743-BB6F-9AEB5570D96B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{810CECC8-EBC5-B743-BB6F-9AEB5570D96B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
