@@ -50,7 +50,7 @@ public class CannonLaserController : MonoBehaviour
                 }
             }
             EShipController controller = collider.gameObject.GetComponent<EShipController>();
-            controller.Clone();
+            //controller.Clone();
             Destroy(collider.gameObject);
             controller.destroyed = true;
             //Debug.Log(" laser Fired " + collider.name);
@@ -59,6 +59,10 @@ public class CannonLaserController : MonoBehaviour
             gameController.SetScoreText();
         }
         else if (collider.name == "ground")
+        {
+            Destroy(gameObject);
+        }
+        else if (collider.tag == "bunker")
         {
             Destroy(gameObject);
         }

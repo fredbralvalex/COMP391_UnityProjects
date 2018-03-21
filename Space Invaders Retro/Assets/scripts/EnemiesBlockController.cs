@@ -26,6 +26,11 @@ public class EnemiesBlockController : MonoBehaviour {
     {
         EShipController [] enemies05 = GameObject.FindObjectsOfType<EShipController>();       
         
+        if (enemies05.Length < 1)
+        {
+            return null;
+        }
+
         return chooseEnemy(enemies05);
     }
     public EShipController chooseEnemy(EShipController[] enemies)

@@ -35,6 +35,10 @@ public class EnemyCannonLaserController : MonoBehaviour {
         {
             Destroy(gameObject);
         }
+        else if (collider.tag == "bunker")
+        {
+            Destroy(gameObject);
+        }
     }
     void OnCollisionEnter2D(Collision2D collision)
     {

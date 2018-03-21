@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using Assets.scripts;
 
 public class GameController : MonoBehaviour {
 
@@ -8,7 +10,7 @@ public class GameController : MonoBehaviour {
 
     private GameObject shipBlocks;
     private GameObject cannon;
-    private int lives = 3;
+    private int lives = 0;
 
     private GameObject life;
 
@@ -17,7 +19,7 @@ public class GameController : MonoBehaviour {
     SpriteRenderer life3;
 
     public long points = 0;
-    public long hiPoints = 0;
+
     public UnityEngine.UI.Text score;
     public UnityEngine.UI.Text hiScore;
 
@@ -48,40 +50,38 @@ public class GameController : MonoBehaviour {
 
         StartLife();
         StartHiScore();
-        RespawnEnemies();
     }
 
     void StartHiScore()
     {
-        if (points > hiPoints)
+        if (points > GameState.getInstance().hiPoints)
         {
-            hiPoints = points;
+            GameState.getInstance().hiPoints = points;
         }
         points = 0;
         SetHiScoreText();
     }
 
-    void RespawnEnemies()
-    {
-        EShipController[] enemies05 = GameObject.FindObjectsOfType<EShipController>();
-        foreach (EShipController ship in enemies05)
-        {            
-            ship.Respawn();
-        }
-    }
-
     void StartLife()
     {
         SpriteRenderer liveVar = life.GetComponent<SpriteRenderer>();
+        if (lives > 0)
+        {
+            life1 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
+            life1.transform.position = new Vector3(-6.53f, -6.53f, 0);
+        }
 
-        life1 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
-        life1.transform.position = new Vector3(-6.53f, -6.53f, 0);
+        if (lives > 1)
+        {
+            life2 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
+            life2.transform.position = new Vector3(-5.03f, -6.53f, 0);
+        }
 
-        life2 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
-        life2.transform.position = new Vector3(-5.03f, -6.53f, 0);
-
-        life3 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
-        life3.transform.position = new Vector3(-3.53f, -6.53f, 0);
+        if (lives > 2)
+        {
+            life3 = Instantiate(liveVar, liveVar.transform.position, liveVar.transform.rotation) as SpriteRenderer;
+            life3.transform.position = new Vector3(-3.53f, -6.53f, 0);
+        }
 
     }
 
@@ -98,7 +98,14 @@ public class GameController : MonoBehaviour {
                 eBlockController.moveUsingTransform();
 
                 EShipController enemy = eBlockController.getOneEnemy();
-                enemy.fire();
+                if (enemy == null)//end Game
+                {
+                    SceneManager.LoadScene(2);
+            }
+                else
+                { 
+                    enemy.fire();
+                }
                 time =  0;
             }
     }
@@ -118,18 +125,23 @@ public class GameController : MonoBehaviour {
             Destroy(life1.gameObject);
         } else
         {
-            Restart();
+            //Restart();
+            if (points > GameState.getInstance().hiPoints)
+            {
+                GameState.getInstance().hiPoints = points;
+            }
+            SceneManager.LoadScene(2);
         }
     }
 
     public void SetScoreText()
     {
-        score.text = points.ToString();        
+        score.text = points.ToString().PadLeft(4, '0');
     }
 
     void SetHiScoreText()
     {
-        hiScore.text = hiPoints.ToString();
+        hiScore.text = GameState.getInstance().hiPoints.ToString().PadLeft(4, '0');
     }
 
 }
