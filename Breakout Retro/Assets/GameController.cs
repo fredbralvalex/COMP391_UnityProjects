@@ -1,14 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using Assets;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
     private int lives = 3;
     public long points = 0;
-    public long hiPoints = 0;
-    public UnityEngine.UI.Text score;
-    public UnityEngine.UI.Text hiScore;
+    public TextMeshProUGUI score;    
+    public TextMeshProUGUI hiScore;
 
     SpriteRenderer life1;
     SpriteRenderer life2;
@@ -32,9 +34,9 @@ public class GameController : MonoBehaviour {
 
     void StartHiScore()
     {
-        if (points > hiPoints)
+        if (points > GameState.getInstance().hiPoints)
         {
-            hiPoints = points;
+            GameState.getInstance().hiPoints = points;
         }
         points = 0;
         SetHiScoreText();
@@ -79,7 +81,11 @@ public class GameController : MonoBehaviour {
         }
         else
         {
-            Restart();
+            if (points > GameState.getInstance().hiPoints)
+            {
+                GameState.getInstance().hiPoints = points;
+            }
+            SceneManager.LoadScene(2);
         }
     }
 
@@ -90,7 +96,7 @@ public class GameController : MonoBehaviour {
 
     void SetHiScoreText()
     {
-        hiScore.text = hiPoints.ToString();
+        hiScore.text = GameState.getInstance().hiPoints.ToString();
     }
 
 }
