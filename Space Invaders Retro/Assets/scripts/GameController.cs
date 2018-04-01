@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Assets.scripts;
+using TMPro;
 
 public class GameController : MonoBehaviour {
 
@@ -19,9 +20,10 @@ public class GameController : MonoBehaviour {
     SpriteRenderer life3;
 
     public long points = 0;
+        
+    public TextMeshProUGUI score;
+    public TextMeshProUGUI hiScore;
 
-    public UnityEngine.UI.Text score;
-    public UnityEngine.UI.Text hiScore;
 
     private Vector3 initialEnemyPosition;
     private Vector3 initialCannonPosition;
