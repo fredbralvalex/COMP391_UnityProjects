@@ -15,7 +15,7 @@ public class EnemyCannonLaserController : MonoBehaviour {
     {
         if (fired)
         {
-            Vector2 nextPosition = Vector2.down * 2 * CannonController.speed * Time.deltaTime;
+            Vector2 nextPosition = Vector2.down * 2 * GameController.laserSpeed * Time.deltaTime;
             transform.localPosition += (Vector3)nextPosition;
         }
     }
@@ -39,6 +39,7 @@ public class EnemyCannonLaserController : MonoBehaviour {
         {
             Destroy(gameObject);
         }
+
     }
     void OnCollisionEnter2D(Collision2D collision)
     {

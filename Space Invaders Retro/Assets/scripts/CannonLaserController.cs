@@ -16,13 +16,14 @@ public class CannonLaserController : MonoBehaviour
     {
         if (fired)
         {
-            Vector2 nextPosition = Vector2.up * 2 * CannonController.speed * Time.deltaTime;
+            Vector2 nextPosition = Vector2.up * 2 * GameController.laserSpeed * Time.deltaTime;
             transform.localPosition += (Vector3)nextPosition;
         }
     }
 
     void OnTriggerEnter2D(Collider2D collider)
     {
+        //Debug.Log(" on trigger enter cannon Fired " + collider.name);
         if (collider.tag == "eShip01" || collider.tag == "eShip02" || collider.tag == "eShip03")
         {
             if (collider.tag == "eShip01") {
@@ -66,9 +67,24 @@ public class CannonLaserController : MonoBehaviour
         {
             Destroy(gameObject);
         }
+        else if (collider.name == "efire(Clone)")
+        {
+            //Debug.Log("trigger enter fire");
+            Destroy(collider.gameObject);
+            Destroy(gameObject);
+        }
     }
     void OnCollisionEnter2D(Collision2D collision)
     {
-        //Debug.Log("on collision laser");
+        /*
+        Collider2D collider = collision.collider;
+        Debug.Log(" on collide cannon Fired " + collider.name);
+        if (collider.name == "efire")
+        {
+            Debug.Log("on collision efire");
+            Destroy(collider.gameObject);
+            Destroy(gameObject);
+        }
+        */
     }
 }

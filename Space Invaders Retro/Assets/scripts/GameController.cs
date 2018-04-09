@@ -7,11 +7,13 @@ using TMPro;
 
 public class GameController : MonoBehaviour {
 
-    private EnemiesBlockController eBlockController;    
+    private EnemiesBlockController eBlockController;
 
+    static public float laserSpeed = 8f;
+    static public float cannonSpeed = 7f;
     private GameObject shipBlocks;
     private GameObject cannon;
-    private int lives = 0;
+    private int lives = 1;
 
     private GameObject life;
 

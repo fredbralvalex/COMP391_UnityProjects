@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CannonController : MonoBehaviour {
-
-    static public float speed = 8f;
+    
     public const float SPEED_CONSTANT = 1f;
     
     public float distance = 0.11f;
@@ -88,7 +87,7 @@ public class CannonController : MonoBehaviour {
 
     private void moveStoping(Vector2 direction)
     {
-        Vector2 nextPosition = direction * speed * Time.deltaTime;
+        Vector2 nextPosition = direction * GameController.cannonSpeed * Time.deltaTime;
         if (stateMovement)
         {
             if (keyValid())
