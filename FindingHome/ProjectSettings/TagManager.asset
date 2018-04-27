@@ -5,6 +5,28 @@ TagManager:
   serializedVersion: 2
   tags:
   - ground
+  - wall
+  - slider
+  - slider_left
+  - slider_right
+  - stair
+  - upstair
+  - downstair
+  - middlestair
+  - spray_can
+  - locker01
+  - key01
+  - switch
+  - boat
+  - key
+  - locker
+  - door
+  - water
+  - water_deep
+  - water_wave
+  - diamond
+  - life
+  - coin
   layers:
   - Default
   - TransparentFX
