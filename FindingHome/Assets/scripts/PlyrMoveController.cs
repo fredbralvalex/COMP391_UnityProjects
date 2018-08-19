@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlyrMoveController : MonoBehaviour {
 
     public const float FIRE_OFFSET = 1;
-    public enum Movement { Walk, Idle, Jump, Down, Ladder, Run, Slide, Fall, ReachGround, Action, FireSpray};
+    public enum Movement { Walk, Idle, Jump, Down, Ladder, Run, Slide, Fall, ReachGround, Action, FireSpray };
     Movement state = Movement.Idle;
     bool stateMovement = false;
     bool stateRun = false;
@@ -17,9 +17,10 @@ public class PlyrMoveController : MonoBehaviour {
     bool stateStop = true;
     bool touchingGround = false;
     bool touchingBoat = false;
+    bool isTouchingLadder = false;
 
     LadderPosition touchingLadder = LadderPosition.None;
-    public enum LadderPosition { None, Top, Botton, Middle};
+    public enum LadderPosition { None, Top, Botton, Middle };
     public List<LadderPosition> positionsTouches;
 
     public List<GameObject> items;
@@ -41,7 +42,7 @@ public class PlyrMoveController : MonoBehaviour {
 
     float maxJumpHigh;
     bool moveCameraDown = false;
-
+    float positionLadder;
 
     GameObject switchEntered = null;
 
@@ -50,7 +51,7 @@ public class PlyrMoveController : MonoBehaviour {
         return state;
     }
 
-    public GameObject GetSprayCan ()
+    public GameObject GetSprayCan()
     {
         foreach (GameObject item in items)
         {
@@ -93,7 +94,7 @@ public class PlyrMoveController : MonoBehaviour {
         int count = 0;
         foreach (GameObject item in items)
         {
-            
+
             if (item.tag == name)
             {
                 count++;
@@ -103,7 +104,7 @@ public class PlyrMoveController : MonoBehaviour {
     }
 
     public bool hasSprayCan()
-    {        
+    {
         return GetSprayCan() != null;
     }
 
@@ -112,7 +113,7 @@ public class PlyrMoveController : MonoBehaviour {
         return moveCameraDown;
     }
 
-    void Start () {
+    void Start() {
         animator = gameObject.GetComponent<Animator>();
         sprite = gameObject.GetComponent<SpriteRenderer>();
         character = gameObject.GetComponent<Rigidbody2D>();
@@ -123,7 +124,7 @@ public class PlyrMoveController : MonoBehaviour {
 
     void FixedUpdate()
     {
-        
+
         sail();
         run();
         time += Time.deltaTime;
@@ -132,6 +133,28 @@ public class PlyrMoveController : MonoBehaviour {
             performActionSwitch(switchEntered);
         }
 
+        if (state == Movement.Ladder)
+        {
+            //character.gravityScale = 0;
+            Debug.Log("Movement Ladder");
+        }
+
+        if (isTouchingLadder)
+        {
+            //character.gravityScale = 0;
+            performeUpDownLadder();
+            down();
+            move();
+            jump();
+            fireSpray();
+            return;
+        } else
+        {
+            //character.gravityScale = 1;
+        }
+
+
+        /*
         if (positionsTouches.Count > 0)//(state == Movement.Ladder)
         {
             
@@ -142,7 +165,7 @@ public class PlyrMoveController : MonoBehaviour {
             }
             performeUpDownLadder();
             return;
-        }
+        }*/
 
         if (state == Movement.Slide)
         {
@@ -174,24 +197,32 @@ public class PlyrMoveController : MonoBehaviour {
             fireSpray();
         }
 
-        if (!touchingGround && state != Movement.Jump && state != Movement.Ladder && state != Movement.Slide)
+        if (!isTouchingLadder && !touchingGround && state != Movement.Jump && state != Movement.Ladder && state != Movement.Slide && state != Movement.Ladder)
         {
-            //Debug.Log("Falling");
+            //Debug.Log("Falling 01");
             state = Movement.Fall;
             performeJumpFall();
             return;
-        }        
+        }
 
         //waiting the player reach the ground
         if (state != Movement.Jump && state != Movement.Fall)
         {
-            if(state == Movement.Slide)
+            if (state == Movement.Slide)
             {
                 slide();
             }
             else if (state == Movement.Down)
             {
                 down();
+            }
+            else if (state == Movement.Ladder)
+            {
+                performeUpDownLadder();
+                down();
+                move();
+                jump();
+                fireSpray();
             }
             else
             {
@@ -200,8 +231,8 @@ public class PlyrMoveController : MonoBehaviour {
                 move();
                 jump();
                 fireSpray();
-                
-            }            
+
+            }
         }
         else
         {
@@ -209,7 +240,7 @@ public class PlyrMoveController : MonoBehaviour {
             Debug.Log("actual" + transform.localPosition.y);
             Debug.Log("size" + sprite.bounds.size.y);*/
             performeJumpFall();
-        }        
+        }
     }
 
     void sail()
@@ -218,8 +249,8 @@ public class PlyrMoveController : MonoBehaviour {
         {
             GameObject boat = GameObject.Find("boat");
             BoatController controller = boat.GetComponent<BoatController>();
-                transform.localPosition = 
-                    new Vector3(transform.position.x + Mathf.Abs(controller.getDeltaPosition()), transform.localPosition.y, transform.localPosition.z);
+            transform.localPosition =
+                new Vector3(transform.position.x + Mathf.Abs(controller.getDeltaPosition()), transform.localPosition.y, transform.localPosition.z);
         }
     }
 
@@ -228,7 +259,7 @@ public class PlyrMoveController : MonoBehaviour {
         bool wait = false;
         if (state == Movement.Down)
         {
-            wait =  time <= timeToDown;
+            wait = time <= timeToDown;
         } else if (state == Movement.ReachGround)
         {
             //Debug.Log("wait reach ground");
@@ -240,18 +271,51 @@ public class PlyrMoveController : MonoBehaviour {
             wait = time <= timeToFireSpray;
         }
 
-        return wait;       
+        return wait;
     }
 
-
     private void performeUpDownLadder()
+    {
+        if (Input.GetKey(GameController.UP)|| Input.GetKeyDown(GameController.UP) 
+            || Input.GetKey(GameController.DOWN)|| Input.GetKeyDown(GameController.DOWN))
+        {
+            //character.gravityScale = 0; 
+            Debug.Log("Perform");
+            state = Movement.Ladder;
+            //Vector2 nextPositionVertical;
+            float verticalVariation = 0;
+            if (Input.GetKey(GameController.UP) || Input.GetKeyDown(GameController.UP))
+            {
+                ladderDirection = LadderDirection.Up;
+                //nextPositionVertical = Vector2.up * GameController.SPEED_LADDER * Time.deltaTime;
+                verticalVariation = verticalVariation + GameController.SPEED_LADDER;
+            }
+            else if (Input.GetKey(GameController.DOWN) || Input.GetKeyDown(GameController.DOWN))
+            {
+                ladderDirection = LadderDirection.Down;
+                verticalVariation = verticalVariation - GameController.SPEED_LADDER;
+                //nextPositionVertical = Vector2.down * GameController.SPEED_LADDER * Time.deltaTime;
+            }
+            else
+            {
+                //ladderDirection = LadderDirection.None;
+                //nextPositionVertical = Vector2.zero;
+            }
+            //transform.localPosition += (Vector3)nextPositionVertical;
+            transform.localPosition = new Vector3(transform.position.x, transform.position.y + verticalVariation, transform.localPosition.z);
+        }
+
+    }
+
+    [System.Obsolete()]
+    private void performeUpDownLadder_()
     {
 
 
         if (time <= timeToUseLadder)
         {
             return;
-        }        
+        }
         time = 0;
 
         Animator animation = animator.GetComponent<Animator>();
@@ -266,7 +330,7 @@ public class PlyrMoveController : MonoBehaviour {
                     animation.Play("ladder_middle_left");
                 } else
                 {
-                    animation.Play("ladder_middle_right"); 
+                    animation.Play("ladder_middle_right");
                 }
 
             }
@@ -294,7 +358,7 @@ public class PlyrMoveController : MonoBehaviour {
         {
             ladderDirection = LadderDirection.Up;
             nextPositionVertical = Vector2.up * GameController.SPEED_LADDER * Time.deltaTime;
-            
+
         }
         else if (Input.GetKey(GameController.DOWN))
         {
@@ -329,14 +393,14 @@ public class PlyrMoveController : MonoBehaviour {
         {
             stateMove = Direction.Right;
             stateStop = false;
-            nextPositionHorizontal = Vector2.right* GameController.SPEED_CONSTANT * varRun * Time.deltaTime;            
+            nextPositionHorizontal = Vector2.right * GameController.SPEED_CONSTANT * varRun * Time.deltaTime;
         } else
         {
             nextPositionHorizontal = Vector2.zero;
             stateStop = true;
         }
 
-        Vector2 nextPositionVertical = Vector2.zero;               
+        Vector2 nextPositionVertical = Vector2.zero;
 
         if (state == Movement.Jump)
         {
@@ -344,8 +408,8 @@ public class PlyrMoveController : MonoBehaviour {
             {
                 //going high       
                 //state = Movement.Jump;
-                nextPositionVertical = Vector2.up * GameController.SPEED_JUMP_CONSTANT * Time.deltaTime;            
-            }else
+                nextPositionVertical = Vector2.up * GameController.SPEED_JUMP_CONSTANT * Time.deltaTime;
+            } else
             {
                 state = Movement.Fall;                
             }
@@ -353,7 +417,8 @@ public class PlyrMoveController : MonoBehaviour {
 
         if (state == Movement.Fall)
         {
-            nextPositionVertical = Vector2.up *2 * Time.deltaTime;
+            //Add more hight to the char when falling
+            nextPositionVertical = Vector2.up * 2 * Time.deltaTime;
             fall();
         }
 
@@ -362,9 +427,9 @@ public class PlyrMoveController : MonoBehaviour {
         {
             transform.localPosition += (Vector3)nextPositionHorizontal;
         }
-    }    
+    }
 
-    private void run ()
+    private void run()
     {
         if (Input.GetKey(GameController.STEALTH))
         {
@@ -392,7 +457,7 @@ public class PlyrMoveController : MonoBehaviour {
             lastStateMove = stateMove;
             //move left
             stateMove = Direction.Left;
-            Animator animation = animator.GetComponent<Animator>();   
+            Animator animation = animator.GetComponent<Animator>();
             if (stateRun)
             {
                 animation.Play("run_left");
@@ -434,7 +499,7 @@ public class PlyrMoveController : MonoBehaviour {
                 }
 
             }
-        }       
+        }
     }
 
     private void slide()
@@ -468,6 +533,7 @@ public class PlyrMoveController : MonoBehaviour {
     {
         if (state == Movement.Fall)
         {
+            Debug.Log("Falling fall");
             Animator animation = animator.GetComponent<Animator>();
             if (stateMove == Direction.Left)
             {
@@ -487,7 +553,7 @@ public class PlyrMoveController : MonoBehaviour {
             run();
             //Jump
             state = Movement.Jump;
-            Animator animation = animator.GetComponent<Animator>();            
+            Animator animation = animator.GetComponent<Animator>();
             if (stateMove == Direction.Left)
             {
                 animation.Play("jump_left");
@@ -503,17 +569,15 @@ public class PlyrMoveController : MonoBehaviour {
     private void fireSpray()
     {
         GameObject sprayCan = GetSprayCan();
-        float fireOffset = 0;
         if (Input.GetKeyDown(KeyCode.K) && sprayCan != null)
         {
             SprayCanController controller = sprayCan.GetComponent<SprayCanController>();
-            //use spray
-            
+
             bool hasContent = controller.useSpray();
             Animator animation = animator.GetComponent<Animator>();
             if (hasContent)
             {
-                state = Movement.FireSpray;                
+                state = Movement.FireSpray;
                 if (stateMove == Direction.Left)
                 {
                     //fireOffset = -FIRE_OFFSET;
@@ -524,6 +588,12 @@ public class PlyrMoveController : MonoBehaviour {
                     //fireOffset = FIRE_OFFSET;
                     animation.Play("fire_spray_right");
                 }
+                FireController fireController = GameObject.Find("Fire").GetComponent<FireController>();
+                GameObject fire = fireController.createFire();
+                //use spray
+                fire.transform.localPosition = new Vector3(transform.transform.position.x + 2,
+                    transform.transform.localPosition.y, transform.transform.localPosition.z);
+                Destroy(fire);
             } else
             {
                 state = Movement.Idle;
@@ -539,22 +609,17 @@ public class PlyrMoveController : MonoBehaviour {
                 Destroy(sprayCan);
             }
         }
-        transform.localPosition = new Vector3(transform.transform.position.x + fireOffset, transform.transform.localPosition.y, transform.transform.localPosition.z);
+        //transform.localPosition = new Vector3(transform.transform.position.x + fireOffset, transform.transform.localPosition.y, transform.transform.localPosition.z);
     }
 
     private void performActionSwitch(GameObject switchObj)
     {
         SwitchController controller = switchObj.GetComponent<SwitchController>();
         if (Input.GetKeyDown(KeyCode.K))
-        {            
-                //Debug.Log("ACTION Switch");
-            if (switchObj.name == "switch_1" || switchObj.name == "switch_2" || switchObj.name == "switch_3")
-            {
-                controller.deactivate();
-            } else
-            {
-                controller.activate();
-            }   
+        {
+            GameController.usingGameAction = true;
+            controller.ActionSwitch();
+            //Debug.Log("ACTION Switch");            
         }
     }
 
@@ -579,7 +644,7 @@ public class PlyrMoveController : MonoBehaviour {
             //move head collision offset a little down
             return;
         }
-            
+
         state = Movement.Idle;
     }
 
@@ -590,24 +655,16 @@ public class PlyrMoveController : MonoBehaviour {
         {
             var = GameController.SPEED_RUN_CONSTANT;
         }
-            Vector2 nextPosition = direction * var * GameController.SPEED_CONSTANT * Time.deltaTime;
+        Vector2 nextPosition = direction * var * GameController.SPEED_CONSTANT * Time.deltaTime;
         if (stateMovement)
         {
-            if (keyValid())
-            {
-                transform.localPosition += (Vector3)nextPosition;
-            }
+            transform.localPosition += (Vector3)nextPosition;
         }
         else
         {
             transform.localPosition -= (Vector3)nextPosition;
             stateMovement = true;
         }
-    }
-
-    private bool keyValid()
-    {
-        return true;// !(Input.GetKeyUp(GameController.LEFT) || Input.GetKeyUp(GameController.LEFT));
     }
 
     void OnTriggerEnter2D(Collider2D collider)
@@ -620,6 +677,10 @@ public class PlyrMoveController : MonoBehaviour {
         {
             //End Level
             GameObject.Find("Game").GetComponent<GameController>().endGame();
+        } else if (collider.gameObject.tag == "enemy")
+        {
+            Debug.Log("enemy");
+            GameObject.Find("Game").GetComponent<GameController>().lostLife();
         }
 
         //Add more items
@@ -646,7 +707,7 @@ public class PlyrMoveController : MonoBehaviour {
             //If more than one check the names
             //can open the locker
             if (key != null)
-            {                                
+            {
                 Destroy(collider.gameObject);
                 items.Remove(key);
                 Destroy(key);
@@ -655,24 +716,30 @@ public class PlyrMoveController : MonoBehaviour {
             }
         } else if (collider.gameObject.tag == "switch")
         {
-            //performActionSwitch(collider.gameObject);
             //Debug.Log("enter Switch");
             switchEntered = collider.gameObject;
         }
+        else if (collider.gameObject.tag == "ladder")
+        {
+            Debug.Log("ladder enter");
+            isTouchingLadder = true;
+            //character.gravityScale = 0;
+            //state = Movement.Ladder;
+        }
+    }
 
+    private void OnTriggerEnter2DCollideLadder(Collider2D collider)
+    {
         if (collider.gameObject.name == "stair")
         {
-            //touchingGround = true;
             Debug.Log("stair");
-            //touchingLadder = LadderPosition.None;
             state = Movement.Ladder;
             character.gravityScale = 0;
             transform.localPosition = new Vector3(collider.gameObject.transform.position.x, transform.localPosition.y, transform.localPosition.z);
         }
-        
+
         if (collider.gameObject.tag == "upstair")
         {
-            //touchingGround = true;
             Debug.Log("up");
             touchingLadder = LadderPosition.Botton;
             state = Movement.Ladder;
@@ -681,7 +748,6 @@ public class PlyrMoveController : MonoBehaviour {
         }
         if (collider.gameObject.tag == "downstair")
         {
-            //touchingGround = true;
             Debug.Log("down");
             touchingLadder = LadderPosition.Top;
             state = Movement.Ladder;
@@ -690,15 +756,14 @@ public class PlyrMoveController : MonoBehaviour {
         }
         if (collider.gameObject.tag == "middlestair")
         {
-            //touchingGround = true;
             Debug.Log("middle");
             touchingLadder = LadderPosition.Middle;
             state = Movement.Ladder;
             character.gravityScale = 0;
             positionsTouches.Add(LadderPosition.Middle);
         }
-
     }
+
 
     private void OnTriggerStay(Collider collider)
     {
@@ -706,19 +771,35 @@ public class PlyrMoveController : MonoBehaviour {
         {
             Debug.Log("stay Switch");
         }
+        else if (collider.gameObject.tag == "ladder")
+        {
+            Debug.Log("ladder stay");
+            //character.gravityScale = 0;
+            isTouchingLadder = true;
+            //state = Movement.Ladder;
+        }
     }
 
-    private void OnTriggerExit2D(Collider2D collision)
+    private void OnTriggerExit2D(Collider2D collider)
     {
-         if (collision.gameObject.tag == "switch")
+        if (collider.gameObject.tag == "switch")
         {
-            //performActionSwitch(collider.gameObject);
-            //Debug.Log("exit Switch");
             switchEntered = null;
+        }
+        else if (collider.gameObject.tag == "ladder")
+        {
+            Debug.Log("ladder exit");
+            isTouchingLadder = false;
+            //character.gravityScale = 1;
+            //state = Movement.Idle;
         }
 
 
-        if (collision.gameObject.tag == "upstair")
+    }
+
+    private void OnTriggerExit2DLadder(Collider2D collider)
+    {
+        if (collider.gameObject.tag == "upstair")
         {
             Debug.Log("out up");
             //touchingLadder = LadderPosition.None;
@@ -727,7 +808,7 @@ public class PlyrMoveController : MonoBehaviour {
             //state = Movement.Walk;
         }
 
-        if (collision.gameObject.tag == "downstair")
+        if (collider.gameObject.tag == "downstair")
         {
             Debug.Log("out down");
             //touchingLadder = LadderPosition.None;
@@ -736,7 +817,7 @@ public class PlyrMoveController : MonoBehaviour {
             //state = Movement.Walk;
         }
 
-        if (collision.gameObject.tag == "middlestair")
+        if (collider.gameObject.tag == "middlestair")
         {
             Debug.Log("out  middle");
             //touchingLadder = LadderPosition.None;
@@ -747,13 +828,13 @@ public class PlyrMoveController : MonoBehaviour {
         {
             //Debug.Log("no touch");
             touchingLadder = LadderPosition.None;
-            character.gravityScale = 1;
+            //character.gravityScale = 1;
             state = Movement.Idle;
             //countLadderUse = 0;
 
         }
-    }
 
+    }
 
     private void OnCollisionExit2D(Collision2D collision)
     {        
@@ -762,32 +843,27 @@ public class PlyrMoveController : MonoBehaviour {
         }
         else if (collision.gameObject.tag == "ground")
         {
-//            Debug.Log("not touching the ground");
             touchingGround = false;
+            calcMaxJumpHigh();
         }
         else if (collision.gameObject.tag == "boat")
         {
-            //            Debug.Log("not touching the ground");
             touchingGround = false;
             touchingBoat = false;
+            calcMaxJumpHigh();
         }
         else if (collision.gameObject.tag == "slider_right")
         {
-            //state = Movement.Slide;
             calcMaxJumpHigh();
-            //stateMove = Direction.Right;
         }
         else if (collision.gameObject.tag == "slider_left")
         {
-            //state = Movement.Slide;
             calcMaxJumpHigh();
-            //stateMove = Direction.Left;
         }
     }
     
     private void OnCollisionStay2D(Collision2D collision)
     {
-        //Debug.Log("on collision stay");
         if (collision.gameObject.name == "somethingelse")
         {
         }
@@ -799,14 +875,11 @@ public class PlyrMoveController : MonoBehaviour {
         {
             touchingGround = true;
             touchingBoat = true;
-            //boat.transform.position.x;
-            //state = Movement.Sail;
         }
         else if (collision.gameObject.tag == "slider_left" || collision.gameObject.tag == "slider_right")
         {
             touchingGround = true;
         }
-        //touchingGround = false;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -835,7 +908,7 @@ public class PlyrMoveController : MonoBehaviour {
             }
             else if (collision.gameObject.name == "ground_saveState_1")
             {
-                GameObject.Find("Game").GetComponent<GameController>().setSavePoint(1);
+                //GameObject.Find("Game").GetComponent<GameController>().setSavePoint(1);
             }
 
             if (hitHead(collision))
@@ -849,11 +922,8 @@ public class PlyrMoveController : MonoBehaviour {
             {
                 touchingBoat = true;
             }
-            //Debug.Log("on collision");
             if (state == Movement.Jump || state == Movement.Fall || state == Movement.Slide)
             {
-                //state = Movement.Down;
-                //Debug.Log("on collision - reach ground");
                 Animator animation = animator.GetComponent<Animator>();
                 if (stateMove == Direction.Left)
                 {
@@ -866,20 +936,15 @@ public class PlyrMoveController : MonoBehaviour {
                 state = Movement.ReachGround;
 
             }
-
-            calcMaxJumpHigh();
-
         }
         else if (collision.gameObject.tag == "slider_right")
         {
             state = Movement.Slide;
-            calcMaxJumpHigh();
             stateMove = Direction.Right;
         }
         else if (collision.gameObject.tag == "slider_left")
         {
             state = Movement.Slide;
-            calcMaxJumpHigh();
             stateMove = Direction.Left;
         }
     }

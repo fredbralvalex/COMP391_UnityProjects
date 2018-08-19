@@ -4,25 +4,20 @@ using UnityEngine;
 
 public class WaterController : MonoBehaviour {
 
-    GameObject[] waterDeep;
-    GameObject[] waterWave;
-
-    float varDown = 0.02f;
+    float varDown = GameController.WATER_SPEED_CONSTANT;
     float verticalVariation = 0;
     private float level;
 
-    //public bool soft = true;
-
     // Use this for initialization
     void Start () {
-        waterDeep = GameObject.FindGameObjectsWithTag("water_deep");
-        waterWave = GameObject.FindGameObjectsWithTag("water_wave");
         level = transform.position.y;
     }
 
 	// Update is called once per frame
 	void FixedUpdate () {
-
+        
+        if (GameController.usingGameAction)
+        {
             if (level > transform.position.y)
             {
                 verticalVariation = verticalVariation + varDown;
@@ -38,7 +33,20 @@ public class WaterController : MonoBehaviour {
                     verticalVariation = level;
                 }
             }
-            transform.localPosition = new Vector3(transform.position.x, verticalVariation, transform.localPosition.z);
+
+            //Debug.Log("SOFT");
+        } else
+        {
+           //transform.localPosition = new Vector3(transform.position.x, level, transform.localPosition.z);
+            verticalVariation = level;
+            //Debug.Log("NOT SOFT");
+        }
+
+        if (!(level == verticalVariation && level == transform.position.x))
+        {
+           transform.localPosition = new Vector3(transform.position.x, verticalVariation, transform.localPosition.z);
+        }
+        
 
     }
 
@@ -48,6 +56,12 @@ public class WaterController : MonoBehaviour {
         {
             Debug.Log("enter Water");            
         }
+    }
+
+    public void goToLevel0()
+    {
+        level = -26;
+        //transform.localPosition = new Vector3(transform.position.x, -6, transform.localPosition.z);
     }
 
     public void goToLevel1()

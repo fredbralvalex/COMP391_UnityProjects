@@ -7,6 +7,7 @@ public class BoatController : MonoBehaviour {
     public bool sail;
     public float initialPosition;
     public float deltaPosition;
+    public float minVerticalPosition = -19.13f;
 
     WaterController w;
     GameObject water;
@@ -23,8 +24,13 @@ public class BoatController : MonoBehaviour {
         deltaPosition = initialPosition - transform.position.x;
         initialPosition = transform.position.x;
         sailing();
-
-        transform.localPosition = new Vector3(transform.position.x, water.transform.position.y - 1, transform.localPosition.z);
+        if (water.transform.position.y - 1< minVerticalPosition)
+        {
+            transform.localPosition = new Vector3(transform.position.x, minVerticalPosition, transform.localPosition.z);
+        } else
+        {
+            transform.localPosition = new Vector3(transform.position.x, water.transform.position.y - 1, transform.localPosition.z);
+        }
     }
 
     public float getDeltaPosition()
@@ -34,9 +40,10 @@ public class BoatController : MonoBehaviour {
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        Debug.Log(collision.collider.name);
-
-        if (collision.collider.name == "player")
+        //Debug.Log(collision.collider.name);
+        if (collision.collider.tag == "ground")
+        {
+        } else if (collision.collider.name == "player")
         {
             GameObject.Find("Game").GetComponent<GameController>().setSavePoint(2);
             sail = true;
@@ -53,11 +60,13 @@ public class BoatController : MonoBehaviour {
         }
     }
 
+    [System.Obsolete()]
     public void goToLeve1()
     {
         transform.localPosition = new Vector3(transform.position.x, 2.3f, transform.localPosition.z);
     }
 
+    [System.Obsolete()]
     public void goToLevel2()
     {
         transform.localPosition = new Vector3(transform.position.x, -3.5f, transform.localPosition.z);

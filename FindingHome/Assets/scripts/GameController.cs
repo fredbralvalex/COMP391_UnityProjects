@@ -5,9 +5,10 @@ using TMPro;
 
 public class GameController : MonoBehaviour {
 
+    public const float WATER_SPEED_CONSTANT = 0.4f;
     public const float SPEED_CONSTANT = 2f;
     public const float SPEED_RUN_CONSTANT = 3f;
-    public const float SPEED_LADDER = 32f;
+    public const float SPEED_LADDER = 0.2f;
     public const float SPEED_SLIDE_CONSTANT = 6f;
     public const float SPEED_JUMP_CONSTANT = 10f;
     public const float SPEED_FALL_CONSTANT = 16f;
@@ -65,12 +66,14 @@ public class GameController : MonoBehaviour {
     private Vector3 offset;
 
     public int savePoint = 0;
+
     Vector3 cameraOffset = new Vector3(3.8f, 1.7f, -31.3f);
 
 
     public TextMeshProUGUI counterCoins;
     public TextMeshProUGUI counterDiamonds;
 
+    public static bool usingGameAction = false;
 
     public void setSavePoint(int sp)
     {
@@ -155,7 +158,7 @@ public class GameController : MonoBehaviour {
 
         foreach (GameObject item in items)
         {
-            Debug.Log(item.tag);
+            //Debug.Log(item.tag);
             if (item.tag == "life")
             {
                 itemsTemp.Add(item);
@@ -199,7 +202,7 @@ public class GameController : MonoBehaviour {
                 GameObject cDiamonds = GameObject.Find("CanvasDiamonds");
                 GameObject ccDiamonds = GameObject.Find("CounterDiamonds");
                 Vector3 textOffset =  cDiamonds.transform.position - ccDiamonds.transform.position;
-                cDiamonds.transform.parent = gameElements.transform;
+                cDiamonds.transform.SetParent(gameElements.transform);
                 cDiamonds.transform.localPosition = new Vector3(var - 0.2f, menuposition.transform.localPosition.y - 0.2f, menuposition.transform.localPosition.z) + textOffset;
                 cDiamonds.SetActive(true);
                 var = var + offset;
@@ -210,10 +213,10 @@ public class GameController : MonoBehaviour {
                 GameObject cCoins = GameObject.Find("CanvasCoins");
                 GameObject ccCoins = GameObject.Find("CounterCoins");
                 Vector3 textOffset = cCoins.transform.position - ccCoins.transform.position;
-                cCoins.transform.parent = gameElements.transform;
+                cCoins.transform.SetParent(gameElements.transform);
                 cCoins.transform.localPosition = new Vector3(var - 0.5f, menuposition.transform.localPosition.y - 0.2f, menuposition.transform.localPosition.z) + textOffset;
                 cCoins.SetActive(true);
-            var = var + offset;
+                var = var + offset;
             }
         }
     }
@@ -228,6 +231,13 @@ public class GameController : MonoBehaviour {
     void FixedUpdate () {
         MountMenu();
 
+        /*
+        
+        */
+    }
+
+    public void DoActionWaterLevel()
+    {
         if (!s1.activated && !s2.activated && !s3.activated)
         {
             sd.setsEnabled(true);
@@ -235,10 +245,18 @@ public class GameController : MonoBehaviour {
 
         int count = getActivationCount(s3.activated, s2.activated, s1.activated);
 
-        if (count == 1)
+        if (count == 0)
         {
+            w0.goToLevel0();
+            w1.goToLevel0();
+            w2.goToLevel0();
+        }
+        else if (count == 1)
+        {
+            w0.goToLevel1();
             w1.goToLevel1();
-        } else if (count == 2)
+        }
+        else if (count == 2)
         {
             w0.goToLevel2();
             w1.goToLevel2();
@@ -248,19 +266,26 @@ public class GameController : MonoBehaviour {
             w0.goToLevel3();
             w1.goToLevel3();
         }
-        
+
         if (sd.activated)
         {
-            w2.goToLevel4();
-            bc.goToLeve1();
+            //bc.goToLeve1();
             w0.goToLevel4Level1();
             w1.goToLevel4Level1();
+            w2.goToLevel4();
+
+            s1.setsEnabled(false);
+            s2.setsEnabled(false);
+            s3.setsEnabled(false);
+        } else
+        {
+            w2.goToLevel0();
         }
 
         if (s4.activated)
         {
             w2.goToLevel5();
-            bc.goToLevel2();
+            //bc.goToLevel2();
         }
     }
 
@@ -283,73 +308,91 @@ public class GameController : MonoBehaviour {
         return count;
     }
 
-    public void goToStartGame()
+    private void goToStartGame()
     {
-        s1.activated = true;
-        s2.activated = true;
-        s3.activated = true;
+        s1.setsEnabled(true);
+        s2.setsEnabled(true);
+        s3.setsEnabled(true);
 
+        s1.activate();
+        s2.activate();
+        s3.activate();
 
-        sd.activated = false;
-        s4.activated = false;
-        
+        sd.setsEnabled(false);
+        sd.deactivate();
+        s4.deactivate();
+
         pc.transform.position = new Vector3(-3.43f, -0.46f, -4.9f);
-        bc.transform.position = new Vector3(40.1f, -19.07f, -6.1f);        
+        //bc.transform.position = new Vector3(40.1f, -19.07f, -6.1f);        
 
     }
 
-    public void goToSavePoint01()
+    [System.Obsolete()]
+    private void goToSavePoint01()
     {
-        s1.activated = true;
-        s2.activated = true;
-        s3.activated = true;
+        s1.setsEnabled(true);
+        s2.setsEnabled(true);
+        s3.setsEnabled(true);
 
-        sd.activated = false;
-        s4.activated = false;
+        s1.activate();
+        s2.activate();
+        s3.activate();
+
+        sd.setsEnabled(false);
+        sd.deactivate();
+        s4.deactivate();
         pc.transform.position = new Vector3(22.4f, -2.4f, -4.9f);
     }
 
 
-    public void goToSavePoint02()
+    private void goToSavePoint02()
     {
-        s1.deactivate();
-        s2.deactivate();
-        s3.deactivate();
-        sd.sEnabled = true;
-        sd.activate();        
+        s1.ActionSwitch();
+        s2.ActionSwitch();
+        s3.ActionSwitch();
+        sd.setsEnabled(true);
+        sd.ActionSwitch();
+        s1.setsEnabled(false);
+        s2.setsEnabled(false);
+        s3.setsEnabled(false);
         bc.sail = false;
         pc.transform.position = new Vector3(31.34f, 12.8f, -4.9f);
         bc.transform.position = new Vector3(40.1f, 2.1f, -6.1f);
     }
 
-    public void goToSavePoint03()
+    private void goToSavePoint03()
     {
         s1.deactivate();
         s2.deactivate();
         s3.deactivate();
-        sd.sEnabled = true;
+        sd.setsEnabled(true);
         sd.activate();
         pc.transform.position = new Vector3(60.8f, 2.91f, -4.9f);
         bc.transform.position = new Vector3(55.75f, 1.52f, -6.1f);
     }
 
-    public void goToSavePoint04()
+    private void goToSavePoint04()
     {
         s1.deactivate();
         s2.deactivate();
         s3.deactivate();
-        sd.sEnabled = true;
+        sd.setsEnabled(true);
         sd.activate();
-        s4.sEnabled = true;
+        s4.setsEnabled(true);
         s4.activate();
         pc.transform.position = new Vector3(88.34f, 15.37f, -4.9f);
         bc.transform.position = new Vector3(75.9f, -3.49f, -6.1f);
     }
 
     private void goToSavePoint() {
+        MountMenu();
+        pc.items = items;
+        cc.transform.localPosition = pc.transform.localPosition + cameraOffset;
+
+        usingGameAction = false;
         if (savePoint == 1)
         {
-            goToSavePoint01();
+            //goToSavePoint01();
         }
         else if (savePoint == 2)
         {
@@ -367,9 +410,9 @@ public class GameController : MonoBehaviour {
         {
             goToStartGame();
         }
-        pc.items = items;
-        cc.transform.localPosition = pc.transform.localPosition + cameraOffset;
-        MountMenu();
+
+        DoActionWaterLevel();
+        //usingGameAction = true;
     }
 
     public void lostLife()
@@ -377,8 +420,7 @@ public class GameController : MonoBehaviour {
         GameObject life = pc.GetLife();
         if (life == null)
         {
-            //goToStartGame();
-            SceneManager.LoadScene(2);
+            endGame();
         } else
         {
             pc.items.Remove(life);
@@ -389,8 +431,6 @@ public class GameController : MonoBehaviour {
 
     public void endGame()
     {
-
         SceneManager.LoadScene(2);
-
     }
 }

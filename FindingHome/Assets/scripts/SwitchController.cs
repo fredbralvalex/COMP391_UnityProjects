@@ -3,35 +3,65 @@ using UnityEngine;
 
 public class SwitchController : MonoBehaviour {
 
-    Animator animator;
+    //public bool used = false;
+
     public bool activated;
-    public bool used = false;
-    public bool sEnabled;
-    SpriteRenderer spriteRender;
-    
+    private bool sEnabled;
+    //SpriteRenderer spriteRender;
+    GameController gameController;
+
 
     void Start () {
-        animator = gameObject.GetComponent<Animator>();
-        spriteRender = gameObject.GetComponent<SpriteRenderer>();
+        //spriteRender = gameObject.GetComponent<SpriteRenderer>();
+        gameController = GameObject.Find("Game").GetComponent<GameController>();
     }
 	
 	void FixedUpdate () {
 
 	}
 
+    private Animator GetAnimator()
+    {
+        return gameObject.GetComponent<Animator>();
+    }
+
+    public void ActionSwitch ()
+    {
+        if (sEnabled)
+        {
+            if (activated)
+            {
+                deactivate();
+            } else
+            {
+                activate();
+            }
+            Debug.Log("Enabled");
+            gameController.DoActionWaterLevel();
+        }
+        Debug.Log("Not Enabled");
+    }
+
     public void setsEnabled(bool enable)
     {
         sEnabled = enable;
-        Animator animation = animator.GetComponent<Animator>();
-        if (enable)
+        if (sEnabled)
         {            
-            if (name == "switch_door" && !used)
+            if (name == "switch_door")
             {
-                animation.Play("deactive");
+                //Sprite sprite = Resources.Load<Sprite>("switch_1");
+                //spriteRender.sprite = sprite;
+                PlayAnimation("deactivated");
+            } else
+            {
+                PlayAnimation("activated");
             }
         } else
         {
-            animation.Play("disabled");
+            //
+            //Sprite sprite = Resources.Load<Sprite>("switch_disabled");
+            //spriteRender.sprite = sprite;
+            PlayAnimation("disabled");
         }
     }
 
@@ -41,43 +71,41 @@ public class SwitchController : MonoBehaviour {
 
     public void activate()
     {
-        if (sEnabled && !used && !activated)
+        if (name == "switch_door")
         {
-            if (animator == null)
-            {
-                animator = gameObject.GetComponent<Animator>();
-            }
-            Animator animation = animator.GetComponent<Animator>();
-            if (name == "switch_door")
-            {
-                animation.Play("activating");
-                //animation.Play("activating2");
-                //animation.Play("activated");
-                Destroy(GameObject.Find("door_level2"));
-            } else
-            {
-                animation.Play("activating");
-            }
-
-            activated = true;
-            used = true;
+            PlayAnimation("activating");
+            Destroy(GameObject.Find("door_level2"));
+        } else
+        {
+            PlayAnimation("activating");
         }
+        activated = true;
+
+        //used = true;
     }
 
     public void deactivate()
     {
-        if (sEnabled && !used && activated)
+        
+        if (name == "switch_door")
         {
-            Animator animation = animator.GetComponent<Animator>();
+            PlayAnimation("deactivating");
+        } else
+        {
+            PlayAnimation("deactivating");
+        }
+        activated = false;
 
-            animation.Play("deactivating");
-            activated = false;
-            used = true;
+        //used = true;
 
-            if(name == "switch_1")
-            {
-                GameObject.Find("Game").GetComponent<GameController>().setSavePoint(1);
-            }
+    }
+
+    private void PlayAnimation (string name)
+    {
+        if (GameController.usingGameAction)
+        {
+            Animator animation = GetAnimator();
+            animation.Play(name);
         }
     }
 }

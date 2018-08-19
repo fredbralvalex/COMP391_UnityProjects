@@ -27,6 +27,9 @@ TagManager:
   - diamond
   - life
   - coin
+  - enemy
+  - fire
+  - ladder
   layers:
   - Default
   - TransparentFX
