@@ -331,14 +331,16 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
-=======
->>>>>>> COMP391FINDINGHOME/master
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
 /[Bb]uilds/
 /Assets/AssetStoreTools*
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
 
 # Visual Studio 2015 cache directory
 /.vs/
@@ -367,7 +369,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-
 #Some Projects
 18W --Intro to Game & Simulation (SEC. 002) COMP_391 - Atalho.lnk
 **/COMP391BREAKOUT
