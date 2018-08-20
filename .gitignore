@@ -331,6 +331,8 @@ ASALocalRun/
 # Local History for Visual Studio
 .localhistory/
 
+=======
+>>>>>>> COMP391FINDINGHOME/master
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -365,7 +367,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
-
 
 #Some Projects
 18W --Intro to Game & Simulation (SEC. 002) COMP_391 - Atalho.lnk
